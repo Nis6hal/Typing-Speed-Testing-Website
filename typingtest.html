@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Typing Speed Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    .dark {
+      background: #121212;
+      color: #eee;
+    }
+    .dark .container {
+      background: #1f1f1f;
+      color: #fff;
+    }
+    .quote span.correct { color: lightgreen; }
+    .quote span.incorrect { color: red; }
+    textarea, input[type=text] {
+      width: 100%;
+      padding: 10px;
+      font-size: 18px;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+    .controls, .history, .config {
+      margin-top: 20px;
+    }
+    button {
+      margin-right: 10px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #quoteDisplay {
+      font-size: 22px;
+      margin: 20px 0;
+      min-height: 60px;
+    }
+    table {
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      text-align: left;
+      padding: 5px;
+    }
+    .dark textarea, .dark input, .dark select {
+      background: #333;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Typing Speed Test</h1>
+
+    <div class="config">
+      <label><input type="radio" name="quoteType" value="prewritten" checked> Prewritten</label>
+      <label><input type="radio" name="quoteType" value="custom"> Custom</label>
+      <label><input type="checkbox" id="limitTime"> 60s Challenge</label>
+    </div>
+
+    <textarea id="customTextArea" rows="4" placeholder="One quote per line..." style="display:none;"></textarea>
+    
+    <div id="quoteDisplay" class="quote"></div>
+    <input type="text" id="quoteInput" placeholder="Type here...">
+
+    <div class="controls">
+      <p>⏱️ Time: <span id="timer">0</span>s</p>
+      <p>⌨️ WPM: <span id="wpm">0</span></p>
+      <p>🎯 Accuracy: <span id="accuracy">0</span>%</p>
+      <p>🏆 Best WPM for this quote: <span id="bestWpm">0</span></p>
+      <button id="restartBtn">Restart</button>
+      <button id="clearBtn">Clear History</button>
+      <button id="exportBtn">Export CSV</button>
+      <button id="themeToggle">Toggle Dark Mode</button>
+    </div>
+
+    <div class="history">
+      <h3>Quote-specific History</h3>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const preQuotes = [
+      "The quick brown fox jumps over the lazy dog.",
+      "Typing fast is fun once you get the hang of it.",
+      "Practice daily and your speed will increase.",
+      "This is a simple typing speed test application.",
+      "Consistency beats intensity every single time."
+    ];
+
+    let quotes = [...preQuotes];
+    let currentQuote = "", startTime, timerInterval, typingStarted = false, timeLimitMode = false;
+    let currentTimerLimit = 60;
+
+    const quoteDisplay = document.getElementById("quoteDisplay");
+    const quoteInput = document.getElementById("quoteInput");
+    const timer = document.getElementById("timer");
+    const wpm = document.getElementById("wpm");
+    const accuracy = document.getElementById("accuracy");
+    const bestWpm = document.getElementById("bestWpm");
+    const restartBtn = document.getElementById("restartBtn");
+    const historyList = document.getElementById("historyList");
+    const themeToggle = document.getElementById("themeToggle");
+    const clearBtn = document.getElementById("clearBtn");
+    const customTextArea = document.getElementById("customTextArea");
+    const limitCheckbox = document.getElementById("limitTime");
+    const exportBtn = document.getElementById("exportBtn");
+
+    function getNewQuote() {
+      const quote = quotes[Math.floor(Math.random() * quotes.length)];
+      currentQuote = quote;
+      quoteDisplay.innerHTML = "";
+      quote.split("").forEach(char => {
+        const span = document.createElement("span");
+        span.innerText = char;
+        quoteDisplay.appendChild(span);
+      });
+      quoteInput.value = "";
+      updateBestWPM();
+      resetStats();
+      typingStarted = false;
+    }
+
+    function startTimer() {
+      startTime = new Date();
+      timerInterval = setInterval(() => {
+        let elapsed = Math.floor((new Date() - startTime) / 1000);
+        timer.innerText = elapsed;
+        if (timeLimitMode && elapsed >= currentTimerLimit) {
+          stopTimer();
+          quoteInput.disabled = true;
+          saveHistory();
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function resetStats() {
+      timer.innerText = 0;
+      wpm.innerText = 0;
+      accuracy.innerText = 0;
+      quoteInput.disabled = false;
+    }
+
+    function updateBestWPM() {
+      let history = JSON.parse(localStorage.getItem("quoteHistory")) || {};
+      const quote = currentQuote;
+      if (history[quote]) {
+        let best = Math.max(...history[quote].map(x => x.wpm));
+        bestWpm.innerText = best;
+      } else {
+        bestWpm.innerText = 0;
+      }
+    }
+
+    function saveHistory() {
+      let elapsed = Math.floor((new Date() - startTime) / 1000);
+      const correctChars = quoteDisplay.querySelectorAll("span.correct").length;
+      const inputLen = quoteInput.value.length;
+      const acc = inputLen > 0 ? Math.round((correctChars / inputLen) * 100) : 0;
+      const wpmVal = elapsed > 0 ? Math.round((correctChars / 5) / (elapsed / 60)) : 0;
+
+      let history = JSON.parse(localStorage.getItem("quoteHistory")) || {};
+      if (!history[currentQuote]) history[currentQuote] = [];
+      history[currentQuote].push({ time: elapsed, wpm: wpmVal, accuracy: acc });
+      localStorage.setItem("quoteHistory", JSON.stringify(history));
+
+      updateBestWPM();
+      loadHistory();
+    }
+
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem("quoteHistory")) || {};
+      const data = history[currentQuote] || [];
+      historyList.innerHTML = "";
+      data.forEach(d => {
+        const li = document.createElement("li");
+        li.textContent = `Time: ${d.time}s, WPM: ${d.wpm}, Accuracy: ${d.accuracy}%`;
+        historyList.appendChild(li);
+      });
+    }
+
+    quoteInput.addEventListener("input", () => {
+      if (!typingStarted) {
+        typingStarted = true;
+        startTimer();
+      }
+      const input = quoteInput.value.split("");
+      const spans = quoteDisplay.querySelectorAll("span");
+      let correctChars = 0;
+      let complete = true;
+
+      spans.forEach((span, i) => {
+        const char = input[i];
+        if (!char) {
+          span.classList.remove("correct", "incorrect");
+          complete = false;
+        } else if (char === span.innerText) {
+          span.classList.add("correct");
+          span.classList.remove("incorrect");
+          correctChars++;
+        } else {
+          span.classList.add("incorrect");
+          span.classList.remove("correct");
+          complete = false;
+        }
+      });
+
+      const timeElapsed = (new Date() - startTime) / 60000;
+      wpm.innerText = timeElapsed > 0 ? Math.round((correctChars / 5) / timeElapsed) : 0;
+      accuracy.innerText = input.length > 0 ? Math.round((correctChars / input.length) * 100) : 0;
+
+      if (complete && input.length === currentQuote.length) {
+        stopTimer();
+        saveHistory();
+      }
+    });
+
+    restartBtn.onclick = () => {
+      getNewQuote();
+      stopTimer();
+    };
+
+    themeToggle.onclick = () => {
+      document.body.classList.toggle("dark");
+    };
+
+    clearBtn.onclick = () => {
+      localStorage.removeItem("quoteHistory");
+      loadHistory();
+      bestWpm.innerText = 0;
+    };
+
+    exportBtn.onclick = () => {
+      const history = JSON.parse(localStorage.getItem("quoteHistory")) || {};
+      let csv = "Quote,Time,WPM,Accuracy\n";
+      Object.entries(history).forEach(([quote, sessions]) => {
+        sessions.forEach(s => {
+          csv += `"${quote}",${s.time},${s.wpm},${s.accuracy}\n`;
+        });
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "typing_history.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    document.querySelectorAll("input[name='quoteType']").forEach(r => {
+      r.addEventListener("change", e => {
+        if (e.target.value === "custom") {
+          customTextArea.style.display = "block";
+          quotes = customTextArea.value.trim().split("\n").filter(Boolean);
+        } else {
+          customTextArea.style.display = "none";
+          quotes = [...preQuotes];
+        }
+        getNewQuote();
+      });
+    });
+
+    customTextArea.addEventListener("input", () => {
+      quotes = customTextArea.value.trim().split("\n").filter(Boolean);
+      getNewQuote();
+    });
+
+    limitCheckbox.addEventListener("change", () => {
+      timeLimitMode = limitCheckbox.checked;
+    });
+
+    getNewQuote();
+    loadHistory();
+  </script>
+</body>
+</html>
