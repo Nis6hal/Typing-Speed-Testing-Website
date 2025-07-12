@@ -253,9 +253,11 @@ If you encounter any issues or have questions:
 ### Version History
 - **v1.0.0** - Initial release with core features
 - Complete typing test functionality
-- Theme system and customization
+
+-**v2.0.0-- - - Theme system and customization
 - Achievement and gamification features
 - Responsive design and accessibility
+- Sound/Music for better experience
 
 ---
 
