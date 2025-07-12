@@ -3,112 +3,367 @@
 <head>
   <meta charset="UTF-8">
   <title>Typing Speed Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google Fonts for modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --primary: #4f8cff;
+      --secondary: #38e8ff;
+      --bg: #f7faff;
+      --card-bg: #fff;
+      --text: #222;
+      --accent: #ffb347;
+      --danger: #ff4f4f;
+      --success: #4fe88b;
+      --shadow: 0 4px 24px rgba(79,140,255,0.10);
+      --radius: 18px;
+      --transition: 0.25s cubic-bezier(.4,0,.2,1);
+    }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f0f0;
+      font-family: 'Montserrat', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       margin: 0;
-      padding: 20px;
+      min-height: 100vh;
       transition: background 0.3s, color 0.3s;
     }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border-radius: 8px;
-    }
     .dark {
-      background: #121212;
-      color: #eee;
+      --bg: #181c24;
+      --card-bg: #232a36;
+      --text: #f7faff;
+      --shadow: 0 4px 24px rgba(56,232,255,0.10);
     }
-    .dark .container {
-      background: #1f1f1f;
-      color: #fff;
+    .main-card {
+      max-width: 480px;
+      margin: 40px auto 0 auto;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 24px 24px 24px;
+      position: relative;
+      overflow: hidden;
     }
-    .quote span.correct { color: lightgreen; }
-    .quote span.incorrect { color: red; }
-    textarea, input[type=text] {
-      width: 100%;
-      padding: 10px;
-      font-size: 18px;
-      margin-top: 10px;
-      box-sizing: border-box;
+    .main-card:before {
+      content: "";
+      position: absolute;
+      top: -80px; left: -80px;
+      width: 200px; height: 200px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      opacity: 0.12;
+      border-radius: 50%;
+      z-index: 0;
     }
-    .controls, .history, .config {
-      margin-top: 20px;
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
     }
-    button {
-      margin-right: 10px;
-      padding: 10px 15px;
-      font-size: 16px;
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 2rem; font-weight: bold;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(79,140,255,0.15);
+    }
+    .nickname {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-left: 12px;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+    }
+    .theme-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--primary);
       cursor: pointer;
+      transition: color var(--transition);
     }
-    #quoteDisplay {
-      font-size: 22px;
-      margin: 20px 0;
+    .theme-btn:hover { color: var(--secondary); }
+    .quote-box {
+      background: #f0f6ff;
+      border-radius: 12px;
+      padding: 18px 14px;
+      font-size: 1.18rem;
       min-height: 60px;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+      word-break: break-word;
+      box-shadow: 0 1px 4px rgba(79,140,255,0.05);
+      position: relative;
+      z-index: 1;
     }
-    table {
-      width: 100%;
-      margin-top: 10px;
+    .dark .quote-box { background: #232a36; }
+    .quote-box span.correct { color: var(--success); }
+    .quote-box span.incorrect { color: var(--danger); }
+    .quote-box span.active {
+      border-bottom: 2px solid var(--primary);
+      animation: blink 1s steps(1) infinite;
     }
-    th, td {
-      text-align: left;
-      padding: 5px;
+    @keyframes blink {
+      50% { border-color: transparent; }
     }
-    .dark textarea, .dark input, .dark select {
-      background: #333;
+    .input-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .typing-input {
+      flex: 1;
+      font-size: 1.1rem;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 2px solid #e0e8ff;
+      outline: none;
+      transition: border var(--transition);
+      margin-right: 8px;
+      background: #f7faff;
+      color: var(--text);
+    }
+    .typing-input:focus { border-color: var(--primary); }
+    .dark .typing-input { background: #232a36; border-color: #2a3342; color: #fff; }
+    .modern-btn {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
       color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      margin: 0 4px;
+      box-shadow: 0 2px 8px rgba(79,140,255,0.10);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .modern-btn:active { transform: scale(0.97); }
+    .modern-btn:hover { background: linear-gradient(90deg, var(--secondary), var(--primary)); }
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 18px 0 10px 0;
+      font-size: 1.08rem;
+    }
+    .stat {
+      display: flex; align-items: center; gap: 6px;
+      font-weight: 600;
+    }
+    .stat .fa { color: var(--primary); }
+    .progress-container {
+      width: 100%;
+      background: #e0e0e0;
+      border-radius: 8px;
+      margin: 18px 0 10px 0;
+      height: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(79,140,255,0.05);
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .msg {
+      text-align: center;
+      font-size: 1.1rem;
+      margin: 10px 0 0 0;
+      color: var(--accent);
+      min-height: 24px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .leaderboard, .history {
+      margin-top: 24px;
+      background: #f0f6ff;
+      border-radius: 12px;
+      padding: 14px 12px;
+      box-shadow: 0 1px 4px rgba(79,140,255,0.05);
+    }
+    .dark .leaderboard, .dark .history { background: #232a36; }
+    .leaderboard h3, .history h3 { margin: 0 0 10px 0; font-size: 1.08rem; }
+    .leaderboard-list, .history-list {
+      list-style: none;
+      padding: 0; margin: 0;
+    }
+    .leaderboard-list li, .history-list li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 0;
+      font-size: 1rem;
+    }
+    .leaderboard-list li .fa-trophy { color: var(--accent); }
+    .history-list li .fa-clock { color: var(--primary); }
+    .history-list li .fa-bolt { color: var(--success); }
+    .history-list li .fa-bullseye { color: var(--danger); }
+    .avatar-sm {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff; font-size: 1rem; font-weight: bold;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #fff;
+      margin-right: 4px;
+    }
+    .highlight { background: #e6f7ff; border-radius: 6px; }
+    .dark .highlight { background: #2a3342; }
+    .config-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .config-row label { font-size: 0.98rem; }
+    .nickname-input {
+      border: 1.5px solid #e0e8ff;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 1rem;
+      margin-left: 8px;
+      width: 110px;
+      background: #f7faff;
+      color: var(--text);
+      outline: none;
+      transition: border var(--transition);
+    }
+    .nickname-input:focus { border-color: var(--primary); }
+    .dark .nickname-input { background: #232a36; border-color: #2a3342; color: #fff; }
+    @media (max-width: 600px) {
+      .main-card { padding: 16px 4px 12px 4px; }
+      .header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .nickname { margin-left: 0; }
+      .stats-row { flex-direction: column; gap: 8px; }
+      .config-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+    }
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px; height: 18px;
+      border-radius: 4px;
+      opacity: 0.8;
+      will-change: transform;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Typing Speed Test</h1>
-
-    <div class="config">
+  <div id="animatedBg"></div>
+  <div class="main-card" role="main">
+    <div class="header">
+      <div style="display:flex;align-items:center;">
+        <div class="avatar" id="avatar"></div>
+        <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
+        <span class="nickname" id="nicknameDisplay"></span>
+        <input class="nickname-input" id="nicknameInput" maxlength="12" style="display:none;" placeholder="Your name">
+        <div id="badgeBar" style="margin-left:10px;display:flex;gap:4px;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="xpBarContainer" style="width:120px;height:18px;background:#e0e0e0;border-radius:9px;overflow:hidden;position:relative;">
+          <div id="xpBar" style="height:100%;width:0;background:linear-gradient(90deg,#4f8cff,#38e8ff);transition:width 0.5s;"></div>
+          <span id="levelLabel" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:0.9em;font-weight:700;color:#333;">Lv.1</span>
+        </div>
+        <button class="theme-btn" id="themeToggle" title="Toggle dark mode"><i class="fa fa-moon"></i></button>
+      </div>
+    </div>
+    <div class="config-row">
       <label><input type="radio" name="quoteType" value="prewritten" checked> Prewritten</label>
       <label><input type="radio" name="quoteType" value="custom"> Custom</label>
       <label><input type="checkbox" id="limitTime"> 60s Challenge</label>
+      <label><input type="checkbox" id="soundToggle" checked> Sound</label>
+      <button class="modern-btn" id="zenModeBtn" title="Zen Mode"><i class="fa fa-leaf"></i></button>
+      <button class="modern-btn" id="themeGalleryBtn" title="Themes"><i class="fa fa-palette"></i></button>
+      <button class="modern-btn" id="musicBtn" title="Music"><i class="fa fa-music"></i></button>
     </div>
-
-    <textarea id="customTextArea" rows="4" placeholder="One quote per line..." style="display:none;"></textarea>
-    
-    <div id="quoteDisplay" class="quote"></div>
-    <input type="text" id="quoteInput" placeholder="Type here...">
-
-    <div class="controls">
-      <p>⏱️ Time: <span id="timer">0</span>s</p>
-      <p>⌨️ WPM: <span id="wpm">0</span></p>
-      <p>🎯 Accuracy: <span id="accuracy">0</span>%</p>
-      <p>🏆 Best WPM for this quote: <span id="bestWpm">0</span></p>
-      <button id="restartBtn">Restart</button>
-      <button id="clearBtn">Clear History</button>
-      <button id="exportBtn">Export CSV</button>
-      <button id="themeToggle">Toggle Dark Mode</button>
+    <div id="dailyChallengeBar" style="margin-bottom:8px;"></div>
+    <div id="questBar" style="margin-bottom:8px;"></div>
+    <textarea id="customTextArea" rows="3" placeholder="One quote per line..." style="display:none;width:100%;margin-bottom:8px;" aria-label="Custom Quotes"></textarea>
+    <div class="quote-box" id="quoteDisplay" aria-live="polite"></div>
+    <div class="input-row">
+      <input type="text" id="quoteInput" class="typing-input" placeholder="Type here..." aria-label="Typing input" autocomplete="off">
+      <button class="modern-btn" id="restartBtn" title="Restart"><i class="fa fa-redo"></i></button>
+      <button class="modern-btn" id="skipBtn" title="Skip"><i class="fa fa-forward"></i></button>
+      <button class="modern-btn" id="practiceBtn" title="Practice Mode"><i class="fa fa-dumbbell"></i></button>
     </div>
-
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><i class="fa fa-clock"></i> <span id="timer">0</span>s</div>
+      <div class="stat"><i class="fa fa-bolt"></i> <span id="wpm">0</span> WPM</div>
+      <div class="stat"><i class="fa fa-bullseye"></i> <span id="accuracy">0</span>%</div>
+      <div class="stat"><i class="fa fa-trophy"></i> <span id="bestWpm">0</span></div>
+    </div>
+    <div class="msg" id="msg"></div>
+    <div id="progressChartContainer" style="margin:18px 0 0 0;"></div>
+    <div id="errorHeatmapContainer" style="margin:18px 0 0 0;"></div>
     <div class="history">
-      <h3>Quote-specific History</h3>
-      <ul id="historyList"></ul>
+      <h3>History (last 5)</h3>
+      <ul class="history-list" id="historyList"></ul>
+    </div>
+    <div class="leaderboard">
+      <h3>🏅 Leaderboard (Top 5 WPM)</h3>
+      <ol class="leaderboard-list" id="leaderboardList"></ol>
+      <div id="globalLeaderboardContainer"></div>
+      <button class="modern-btn" id="shareBtn"><i class="fa fa-share-alt"></i> Share Score</button>
+    </div>
+    <div class="history" id="achievementsSection">
+      <h3>Achievements</h3>
+      <div id="achievementsList" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+    </div>
+    <div id="themeGalleryModal" style="display:none;"></div>
+    <div id="musicModal" style="display:none;"></div>
+    <div id="zenOverlay" style="display:none;"></div>
+    <div style="text-align:center;margin-top:12px;">
+      <button class="modern-btn" id="clearBtn"><i class="fa fa-trash"></i> Clear History</button>
+      <button class="modern-btn" id="exportBtn"><i class="fa fa-file-csv"></i> Export CSV</button>
     </div>
   </div>
-
+  <div class="confetti" id="confetti"></div>
   <script>
+    // --- Constants ---
     const preQuotes = [
       "The quick brown fox jumps over the lazy dog.",
       "Typing fast is fun once you get the hang of it.",
       "Practice daily and your speed will increase.",
       "This is a simple typing speed test application.",
-      "Consistency beats intensity every single time."
+      "Consistency beats intensity every single time.",
+      "A journey of a thousand miles begins with a single step.",
+      "Stay hungry, stay foolish.",
+      "Simplicity is the ultimate sophistication.",
+      "To be or not to be, that is the question.",
+      "All our dreams can come true, if we have the courage to pursue them."
     ];
-
+    const AVG_WORD_LEN = 5;
+    const HISTORY_LIMIT = 5;
+    const LEADERBOARD_LIMIT = 5;
+    const MSGS = [
+      "Great job! 🚀",
+      "Keep going! 💪",
+      "You're improving! 🌟",
+      "Amazing speed! ⚡",
+      "Accuracy is key! 🎯",
+      "New record! 🏆",
+      "Practice makes perfect! 📝"
+    ];
+    // --- State ---
     let quotes = [...preQuotes];
+    let usedQuotes = [];
     let currentQuote = "", startTime, timerInterval, typingStarted = false, timeLimitMode = false;
-    let currentTimerLimit = 60;
-
+    let currentTimerLimit = 60, paused = false, pauseTime = 0, elapsedBeforePause = 0;
+    let soundEnabled = true;
+    let nickname = localStorage.getItem("nickname") || "Guest";
+    let avatarSeed = localStorage.getItem("avatarSeed") || Math.floor(Math.random()*26);
+    // --- Elements ---
     const quoteDisplay = document.getElementById("quoteDisplay");
     const quoteInput = document.getElementById("quoteInput");
     const timer = document.getElementById("timer");
@@ -116,52 +371,199 @@
     const accuracy = document.getElementById("accuracy");
     const bestWpm = document.getElementById("bestWpm");
     const restartBtn = document.getElementById("restartBtn");
+    const skipBtn = document.getElementById("skipBtn");
     const historyList = document.getElementById("historyList");
+    const leaderboardList = document.getElementById("leaderboardList");
     const themeToggle = document.getElementById("themeToggle");
     const clearBtn = document.getElementById("clearBtn");
     const customTextArea = document.getElementById("customTextArea");
     const limitCheckbox = document.getElementById("limitTime");
     const exportBtn = document.getElementById("exportBtn");
-
+    const soundToggle = document.getElementById("soundToggle");
+    const progressBar = document.getElementById("progressBar");
+    const msg = document.getElementById("msg");
+    const nicknameDisplay = document.getElementById("nicknameDisplay");
+    const nicknameInput = document.getElementById("nicknameInput");
+    const avatar = document.getElementById("avatar");
+    const confetti = document.getElementById("confetti");
+    // --- Accessibility: Focus input on load and after actions ---
+    function focusInput() { setTimeout(() => quoteInput.focus(), 100); }
+    // --- Theme Persistence ---
+    function setTheme(dark) {
+      if (dark) {
+        document.body.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+        themeToggle.innerHTML = '<i class="fa fa-sun"></i>';
+      } else {
+        document.body.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+        themeToggle.innerHTML = '<i class="fa fa-moon"></i>';
+      }
+    }
+    setTheme(localStorage.getItem("theme") === "dark");
+    themeToggle.onclick = () => setTheme(!document.body.classList.contains("dark"));
+    // --- Sound Feedback ---
+    function playSound(type) {
+      if (!soundEnabled) return;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = type === "correct" ? 660 : (type === "win" ? 880 : 220);
+      g.gain.value = 0.08;
+      o.connect(g).connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.09);
+      setTimeout(() => ctx.close(), 120);
+    }
+    soundToggle.addEventListener("change", () => {
+      soundEnabled = soundToggle.checked;
+      localStorage.setItem("sound", soundEnabled ? "on" : "off");
+    });
+    soundEnabled = localStorage.getItem("sound") !== "off";
+    soundToggle.checked = soundEnabled;
+    // --- Avatar & Nickname ---
+    function updateAvatar() {
+      const letter = (nickname[0] || "G").toUpperCase();
+      const colors = [
+        "#4f8cff", "#38e8ff", "#ffb347", "#ff4f4f", "#4fe88b", "#a47fff", "#ff7fa4",
+        "#ffb3b3", "#b3ffb3", "#b3b3ff", "#ffd580", "#80ffd5", "#d580ff", "#80d5ff"
+      ];
+      avatar.style.background = `linear-gradient(135deg, ${colors[avatarSeed%colors.length]}, #fff)`;
+      avatar.textContent = letter;
+    }
+    function updateNicknameDisplay() {
+      nicknameDisplay.textContent = nickname;
+      updateAvatar();
+    }
+    avatar.onclick = () => {
+      avatarSeed = Math.floor(Math.random()*26);
+      localStorage.setItem("avatarSeed", avatarSeed);
+      updateAvatar();
+    };
+    nicknameDisplay.onclick = () => {
+      nicknameDisplay.style.display = "none";
+      nicknameInput.style.display = "inline-block";
+      nicknameInput.value = nickname;
+      nicknameInput.focus();
+    };
+    nicknameInput.onblur = () => {
+      nickname = nicknameInput.value.trim() || "Guest";
+      localStorage.setItem("nickname", nickname);
+      nicknameDisplay.style.display = "inline";
+      nicknameInput.style.display = "none";
+      updateNicknameDisplay();
+    };
+    nicknameInput.onkeydown = e => {
+      if (e.key === "Enter") nicknameInput.blur();
+    };
+    updateNicknameDisplay();
+    // --- Avatar Upload & Pixel-Art Generator ---
+    const avatarUpload = document.getElementById('avatarUpload');
+    const avatarDiv = document.getElementById('avatar');
+    function setAvatarImage(imgData) {
+      localStorage.setItem('avatarImg', imgData);
+      renderAvatar();
+    }
+    function clearAvatarImage() {
+      localStorage.removeItem('avatarImg');
+      renderAvatar();
+    }
+    function renderAvatar() {
+      const imgData = localStorage.getItem('avatarImg');
+      if (imgData) {
+        avatarDiv.innerHTML = `<img src="${imgData}" alt="avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+      } else {
+        // Pixel-art fallback
+        avatarDiv.innerHTML = '';
+        avatarDiv.style.background = `linear-gradient(135deg, #${Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0')}, #fff)`;
+        const canvas = document.createElement('canvas');
+        canvas.width = 48; canvas.height = 48;
+        const ctx = canvas.getContext('2d');
+        for(let y=0;y<8;y++) for(let x=0;x<8;x++) {
+          ctx.fillStyle = Math.random() > 0.5 ? '#'+Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0') : '#fff';
+          ctx.fillRect(x*6,y*6,6,6);
+        }
+        avatarDiv.appendChild(canvas);
+      }
+    }
+    avatarDiv.onmouseenter = () => { avatarDiv.style.cursor = 'pointer'; avatarDiv.title = 'Click to upload or randomize avatar'; };
+    avatarDiv.onclick = () => {
+      if (confirm('Upload your own avatar? (Cancel for random pixel-art)')) {
+        avatarUpload.click();
+      } else {
+        clearAvatarImage();
+      }
+    };
+    avatarUpload.onchange = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        setAvatarImage(evt.target.result);
+      };
+      reader.readAsDataURL(file);
+    };
+    window.addEventListener('DOMContentLoaded',renderAvatar);
+    // --- Quote Management ---
     function getNewQuote() {
-      const quote = quotes[Math.floor(Math.random() * quotes.length)];
+      if (quotes.length === 0) {
+        quotes = [...usedQuotes];
+        usedQuotes = [];
+      }
+      let quote;
+      do {
+        quote = quotes[Math.floor(Math.random() * quotes.length)];
+      } while (quote === currentQuote && quotes.length > 1);
       currentQuote = quote;
-      quoteDisplay.innerHTML = "";
-      quote.split("").forEach(char => {
-        const span = document.createElement("span");
-        span.innerText = char;
-        quoteDisplay.appendChild(span);
-      });
+      usedQuotes.push(quote);
+      quotes = quotes.filter(q => q !== quote);
+      displayQuote(quote, 0);
       quoteInput.value = "";
       updateBestWPM();
       resetStats();
       typingStarted = false;
+      msg.textContent = "";
+      focusInput();
+      loadHistory();
     }
-
+    function displayQuote(quote, activeIdx) {
+      quoteDisplay.innerHTML = "";
+      quote.split("").forEach((char, i) => {
+        const span = document.createElement("span");
+        span.innerText = char;
+        if (i === activeIdx) span.classList.add("active");
+        quoteDisplay.appendChild(span);
+      });
+    }
+    // --- Timer ---
     function startTimer() {
       startTime = new Date();
       timerInterval = setInterval(() => {
-        let elapsed = Math.floor((new Date() - startTime) / 1000);
-        timer.innerText = elapsed;
-        if (timeLimitMode && elapsed >= currentTimerLimit) {
-          stopTimer();
-          quoteInput.disabled = true;
-          saveHistory();
+        if (!paused) {
+          let elapsed = Math.floor(((new Date() - startTime) / 1000) + elapsedBeforePause);
+          timer.innerText = elapsed;
+          progressBar.style.width = `${(elapsed / currentTimerLimit) * 100}%`;
+          if (timeLimitMode && elapsed >= currentTimerLimit) {
+            stopTimer();
+            quoteInput.disabled = true;
+            saveHistory();
+            showMsg("Time's up! ⏰");
+          }
         }
       }, 1000);
     }
-
-    function stopTimer() {
-      clearInterval(timerInterval);
-    }
-
+    function stopTimer() { clearInterval(timerInterval); }
     function resetStats() {
       timer.innerText = 0;
       wpm.innerText = 0;
       accuracy.innerText = 0;
       quoteInput.disabled = false;
+      elapsedBeforePause = 0;
+      pauseTime = 0;
+      progressBar.style.width = "0%";
     }
-
+    // --- Best WPM ---
     function updateBestWPM() {
       let history = JSON.parse(localStorage.getItem("quoteHistory")) || {};
       const quote = currentQuote;
@@ -172,94 +574,123 @@
         bestWpm.innerText = 0;
       }
     }
-
+    // --- Save & Load History ---
     function saveHistory() {
-      let elapsed = Math.floor((new Date() - startTime) / 1000);
+      let elapsed = Math.floor(((new Date() - startTime) / 1000) + elapsedBeforePause);
       const correctChars = quoteDisplay.querySelectorAll("span.correct").length;
-      const inputLen = quoteInput.value.length;
-      const acc = inputLen > 0 ? Math.round((correctChars / inputLen) * 100) : 0;
-      const wpmVal = elapsed > 0 ? Math.round((correctChars / 5) / (elapsed / 60)) : 0;
-
+      const acc = Math.round((correctChars / currentQuote.length) * 100);
+      const wpmVal = elapsed > 0 ? Math.round((correctChars / AVG_WORD_LEN) / (elapsed / 60)) : 0;
       let history = JSON.parse(localStorage.getItem("quoteHistory")) || {};
       if (!history[currentQuote]) history[currentQuote] = [];
-      history[currentQuote].push({ time: elapsed, wpm: wpmVal, accuracy: acc });
+      history[currentQuote].push({ time: elapsed, wpm: wpmVal, accuracy: acc, date: new Date().toISOString(), nickname, avatarSeed });
+      if (history[currentQuote].length > HISTORY_LIMIT)
+        history[currentQuote] = history[currentQuote].slice(-HISTORY_LIMIT);
       localStorage.setItem("quoteHistory", JSON.stringify(history));
-
       updateBestWPM();
       loadHistory();
+      updateLeaderboard(wpmVal);
+      if (isNewRecord(wpmVal)) {
+        showMsg("New record! 🏆");
+        playSound("win");
+        launchConfetti();
+      } else {
+        showMsg(MSGS[Math.floor(Math.random()*MSGS.length)]);
+      }
     }
-
     function loadHistory() {
       const history = JSON.parse(localStorage.getItem("quoteHistory")) || {};
       const data = history[currentQuote] || [];
       historyList.innerHTML = "";
-      data.forEach(d => {
+      data.slice(-HISTORY_LIMIT).reverse().forEach(d => {
         const li = document.createElement("li");
-        li.textContent = `Time: ${d.time}s, WPM: ${d.wpm}, Accuracy: ${d.accuracy}%`;
+        li.innerHTML = `<span class="avatar-sm" style="background:linear-gradient(135deg,#4f8cff,#fff);">${(d.nickname||"G")[0]}</span>
+          <i class="fa fa-clock"></i> ${d.time}s
+          <i class="fa fa-bolt"></i> ${d.wpm} WPM
+          <i class="fa fa-bullseye"></i> ${d.accuracy}%`;
         historyList.appendChild(li);
       });
     }
-
+    // --- Leaderboard ---
+    function updateLeaderboard(newWpm) {
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      if (newWpm > 0) leaderboard.push({wpm:newWpm, nickname, avatarSeed});
+      leaderboard = leaderboard.sort((a, b) => b.wpm - a.wpm).slice(0, LEADERBOARD_LIMIT);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+      loadLeaderboard();
+    }
+    function loadLeaderboard() {
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      leaderboardList.innerHTML = "";
+      leaderboard.forEach((entry, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="avatar-sm" style="background:linear-gradient(135deg,#4f8cff,#fff);">${(entry.nickname||"G")[0]}</span>
+          <i class="fa fa-trophy"></i> <b>${entry.wpm} WPM</b> <span style="color:#888;">${entry.nickname||"Guest"}</span>`;
+        if (i === 0) li.classList.add("highlight");
+        leaderboardList.appendChild(li);
+      });
+    }
+    function isNewRecord(wpmVal) {
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      return leaderboard.length === 0 || wpmVal > leaderboard[0].wpm;
+    }
+    // --- Input Handling ---
     quoteInput.addEventListener("input", () => {
-      if (!typingStarted) {
+      if (!typingStarted && !paused) {
         typingStarted = true;
         startTimer();
       }
+      if (paused) return;
       const input = quoteInput.value.split("");
       const spans = quoteDisplay.querySelectorAll("span");
       let correctChars = 0;
       let complete = true;
-
       spans.forEach((span, i) => {
         const char = input[i];
+        span.classList.remove("active");
         if (!char) {
           span.classList.remove("correct", "incorrect");
           complete = false;
         } else if (char === span.innerText) {
+          if (!span.classList.contains("correct")) playSound("correct");
           span.classList.add("correct");
           span.classList.remove("incorrect");
           correctChars++;
         } else {
+          if (!span.classList.contains("incorrect")) playSound("incorrect");
           span.classList.add("incorrect");
           span.classList.remove("correct");
           complete = false;
         }
       });
-
-      const timeElapsed = (new Date() - startTime) / 60000;
-      wpm.innerText = timeElapsed > 0 ? Math.round((correctChars / 5) / timeElapsed) : 0;
-      accuracy.innerText = input.length > 0 ? Math.round((correctChars / input.length) * 100) : 0;
-
+      if (input.length < spans.length) spans[input.length]?.classList.add("active");
+      const timeElapsed = (((new Date() - startTime) / 1000) + elapsedBeforePause) / 60;
+      wpm.innerText = timeElapsed > 0 ? Math.round((correctChars / AVG_WORD_LEN) / timeElapsed) : 0;
+      accuracy.innerText = Math.round((correctChars / currentQuote.length) * 100);
       if (complete && input.length === currentQuote.length) {
         stopTimer();
         saveHistory();
+        quoteInput.disabled = true;
       }
     });
-
-    restartBtn.onclick = () => {
-      getNewQuote();
-      stopTimer();
-    };
-
-    themeToggle.onclick = () => {
-      document.body.classList.toggle("dark");
-    };
-
+    // --- Button Actions ---
+    restartBtn.onclick = () => { getNewQuote(); stopTimer(); };
+    skipBtn.onclick = () => { getNewQuote(); stopTimer(); };
     clearBtn.onclick = () => {
       localStorage.removeItem("quoteHistory");
+      localStorage.removeItem("leaderboard");
       loadHistory();
+      loadLeaderboard();
       bestWpm.innerText = 0;
+      showMsg("History cleared.");
     };
-
     exportBtn.onclick = () => {
       const history = JSON.parse(localStorage.getItem("quoteHistory")) || {};
-      let csv = "Quote,Time,WPM,Accuracy\n";
+      let csv = "Quote,Time,WPM,Accuracy,Date,Nickname\n";
       Object.entries(history).forEach(([quote, sessions]) => {
         sessions.forEach(s => {
-          csv += `"${quote}",${s.time},${s.wpm},${s.accuracy}\n`;
+          csv += `"${quote.replace(/"/g, '""')}",${s.time},${s.wpm},${s.accuracy},${s.date},${s.nickname||"Guest"}\n`;
         });
       });
-
       const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -268,7 +699,7 @@
       a.click();
       URL.revokeObjectURL(url);
     };
-
+    // --- Quote Type & Custom Quotes ---
     document.querySelectorAll("input[name='quoteType']").forEach(r => {
       r.addEventListener("change", e => {
         if (e.target.value === "custom") {
@@ -278,21 +709,545 @@
           customTextArea.style.display = "none";
           quotes = [...preQuotes];
         }
+        usedQuotes = [];
         getNewQuote();
       });
     });
-
     customTextArea.addEventListener("input", () => {
       quotes = customTextArea.value.trim().split("\n").filter(Boolean);
+      usedQuotes = [];
       getNewQuote();
     });
-
     limitCheckbox.addEventListener("change", () => {
       timeLimitMode = limitCheckbox.checked;
     });
-
+    // --- Keyboard Shortcuts ---
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") { getNewQuote(); stopTimer(); }
+      if (e.ctrlKey && e.key.toLowerCase() === "p") {
+        paused = !paused;
+        if (paused) {
+          pauseTime = new Date();
+          quoteInput.disabled = true;
+          showMsg("Paused. Ctrl+P to resume.");
+        } else {
+          elapsedBeforePause += (new Date() - pauseTime) / 1000;
+          quoteInput.disabled = false;
+          showMsg("");
+          focusInput();
+        }
+        e.preventDefault();
+      }
+    });
+    // --- Confetti ---
+    function launchConfetti() {
+      confetti.innerHTML = "";
+      for (let i = 0; i < 60; i++) {
+        const div = document.createElement("div");
+        div.className = "confetti-piece";
+        div.style.background = `hsl(${Math.random()*360},90%,60%)`;
+        div.style.left = Math.random()*100 + "vw";
+        div.style.top = "-20px";
+        div.style.transform = `rotate(${Math.random()*360}deg)`;
+        confetti.appendChild(div);
+        setTimeout(() => {
+          div.style.transition = "top 1.2s cubic-bezier(.4,0,.2,1), left 1.2s cubic-bezier(.4,0,.2,1), opacity 1.2s";
+          div.style.top = (60+Math.random()*30) + "vh";
+          div.style.left = (Math.random()*100) + "vw";
+          div.style.opacity = 0;
+        }, 10);
+      }
+      setTimeout(() => confetti.innerHTML = "", 1400);
+    }
+    // --- Motivational Message ---
+    function showMsg(text) {
+      msg.textContent = text;
+    }
+    // --- Initial Load ---
     getNewQuote();
     loadHistory();
+    loadLeaderboard();
+    focusInput();
+  </script>
+  <!-- Achievements & Badges -->
+  <script>
+    // --- Achievements & Badges ---
+    const BADGES = [
+      { id: 'wpm50', icon: 'fa-bolt', color: '#ffb347', label: '50+ WPM', check: () => getMaxWPM() >= 50 },
+      { id: 'acc100', icon: 'fa-bullseye', color: '#4fe88b', label: '100% Accuracy', check: () => hasPerfectAccuracy() },
+      { id: 'tests10', icon: 'fa-star', color: '#38e8ff', label: '10+ Tests', check: () => getTotalTests() >= 10 },
+      { id: 'daily', icon: 'fa-calendar-day', color: '#4f8cff', label: 'Daily Challenge', check: () => getDailyStreak() > 0 }
+    ];
+    function getMaxWPM() {
+      let history = JSON.parse(localStorage.getItem('quoteHistory')) || {};
+      let all = Object.values(history).flat();
+      return all.length ? Math.max(...all.map(x => x.wpm)) : 0;
+    }
+    function hasPerfectAccuracy() {
+      let history = JSON.parse(localStorage.getItem('quoteHistory')) || {};
+      let all = Object.values(history).flat();
+      return all.some(x => x.accuracy === 100);
+    }
+    function getTotalTests() {
+      let history = JSON.parse(localStorage.getItem('quoteHistory')) || {};
+      return Object.values(history).flat().length;
+    }
+    function getDailyStreak() {
+      return parseInt(localStorage.getItem('dailyStreak')||'0',10);
+    }
+    function updateBadges() {
+      const bar = document.getElementById('badgeBar');
+      bar.innerHTML = '';
+      BADGES.forEach(b => {
+        if (b.check()) {
+          bar.innerHTML += `<span title="${b.label}" style="color:${b.color};font-size:1.3em;"><i class="fa ${b.icon}"></i></span>`;
+        }
+      });
+    }
+    function updateAchievementsSection() {
+      const list = document.getElementById('achievementsList');
+      list.innerHTML = '';
+      BADGES.forEach(b => {
+        const unlocked = b.check();
+        list.innerHTML += `<div style="display:flex;align-items:center;gap:6px;opacity:${unlocked?1:0.3};"><span style="color:${b.color};font-size:1.5em;"><i class="fa ${b.icon}"></i></span> <span>${b.label}</span></div>`;
+      });
+    }
+    // --- Daily Challenge ---
+    function getTodayKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    }
+    function getDailyQuote() {
+      const key = getTodayKey();
+      let daily = localStorage.getItem('dailyQuote');
+      let dailyKey = localStorage.getItem('dailyQuoteKey');
+      if (daily && dailyKey === key) return daily;
+      // Pick a random prewritten quote
+      const quote = preQuotes[Math.floor(Math.random()*preQuotes.length)];
+      localStorage.setItem('dailyQuote', quote);
+      localStorage.setItem('dailyQuoteKey', key);
+      return quote;
+    }
+    function updateDailyChallengeBar() {
+      const bar = document.getElementById('dailyChallengeBar');
+      const key = getTodayKey();
+      const dailyQuote = getDailyQuote();
+      const completed = localStorage.getItem('dailyCompleted') === key;
+      const streak = getDailyStreak();
+      bar.innerHTML = `<span style="font-weight:600;">Daily Challenge:</span> <span style="color:#4f8cff;">"${dailyQuote}"</span> <button id="playDailyBtn" class="modern-btn" style="padding:2px 10px;font-size:0.95em;">Play</button> <span style="margin-left:10px;">Streak: <b>${streak}</b></span> <span style="margin-left:10px;">${completed?'<span style=\'color:#4fe88b\'>Completed!</span>':'<span style=\'color:#ffb347\'>Incomplete</span>'}</span>`;
+      document.getElementById('playDailyBtn').onclick = () => startDailyChallenge();
+    }
+    function startDailyChallenge() {
+      currentQuote = getDailyQuote();
+      displayQuote(currentQuote, 0);
+      quoteInput.value = '';
+      updateBestWPM();
+      resetStats();
+      typingStarted = false;
+      msg.textContent = 'Daily Challenge!';
+      focusInput();
+      loadHistory();
+      window.isDaily = true;
+    }
+    function completeDailyChallenge() {
+      const key = getTodayKey();
+      if (localStorage.getItem('dailyCompleted') !== key) {
+        localStorage.setItem('dailyCompleted', key);
+        // Streak logic
+        let streak = getDailyStreak();
+        let lastKey = localStorage.getItem('lastDailyKey');
+        if (lastKey) {
+          const last = new Date(lastKey);
+          const today = new Date(key);
+          const diff = (today-last)/(1000*60*60*24);
+          if (diff === 1) streak++;
+          else streak = 1;
+        } else {
+          streak = 1;
+        }
+        localStorage.setItem('dailyStreak', streak);
+        localStorage.setItem('lastDailyKey', key);
+      }
+      updateDailyChallengeBar();
+      updateBadges();
+      updateAchievementsSection();
+    }
+    // --- Progress Chart ---
+    function updateProgressChart() {
+      const container = document.getElementById('progressChartContainer');
+      let history = JSON.parse(localStorage.getItem('quoteHistory')) || {};
+      let all = Object.values(history).flat().slice(-10);
+      if (!all.length) { container.innerHTML = ''; return; }
+      const wpmVals = all.map(x=>x.wpm);
+      const accVals = all.map(x=>x.accuracy);
+      const maxWpm = Math.max(60, ...wpmVals);
+      const svgW = 320, svgH = 80, pad = 24;
+      function points(vals) {
+        return vals.map((v,i)=>`${pad+i*(svgW-2*pad)/(all.length-1)},${svgH-pad-(v/maxWpm)*(svgH-2*pad)}`).join(' ');
+      }
+      container.innerHTML = `<svg width="${svgW}" height="${svgH}" style="background:#f7faff;border-radius:8px;"><polyline points="${points(wpmVals)}" fill="none" stroke="#4f8cff" stroke-width="3"/><polyline points="${points(accVals)}" fill="none" stroke="#4fe88b" stroke-width="3"/><circle cx="${pad+(wpmVals.length-1)*(svgW-2*pad)/(all.length-1)}" cy="${svgH-pad-(wpmVals[wpmVals.length-1]/maxWpm)*(svgH-2*pad)}" r="4" fill="#4f8cff"/><circle cx="${pad+(accVals.length-1)*(svgW-2*pad)/(all.length-1)}" cy="${svgH-pad-(accVals[accVals.length-1]/maxWpm)*(svgH-2*pad)}" r="4" fill="#4fe88b"/></svg><div style="font-size:0.95em;margin-top:2px;"><span style="color:#4f8cff;">WPM</span> & <span style="color:#4fe88b;">Accuracy</span> (last 10)</div>`;
+    }
+    // --- XP, Leveling, and Theme Unlocks ---
+    const XP_PER_TEST = 10;
+    const XP_PER_WPM = 2;
+    const XP_PER_ACCURACY = 1;
+    const LEVEL_THRESHOLDS = [0, 50, 120, 220, 350, 500, 700, 950, 1250, 1600, 2000];
+    const THEMES = [
+      {id:'default',name:'Default',colors:{'--primary':'#4f8cff','--secondary':'#38e8ff','--bg':'#f7faff','--card-bg':'#fff','--text':'#222'}},
+      {id:'matrix',name:'Matrix',colors:{'--primary':'#00ff41','--secondary':'#007f0e','--bg':'#0f0f0f','--card-bg':'#181c24','--text':'#00ff41'}},
+      {id:'retro',name:'Retro',colors:{'--primary':'#ffb347','--secondary':'#ff4f4f','--bg':'#222','--card-bg':'#2a3342','--text':'#fff'}},
+      {id:'zen',name:'Zen',colors:{'--primary':'#4fe88b','--secondary':'#38e8ff','--bg':'#e0f7fa','--card-bg':'#fff','--text':'#222'}},
+      {id:'rainbow',name:'Rainbow',colors:{'--primary':'#ff4f4f','--secondary':'#4fe88b','--bg':'#fff','--card-bg':'#fff','--text':'#222'}},
+    ];
+    function getXP() { return parseInt(localStorage.getItem('xp')||'0',10); }
+    function setXP(xp) { localStorage.setItem('xp',xp); }
+    function getLevel() {
+      let xp = getXP();
+      for(let i=LEVEL_THRESHOLDS.length-1;i>=0;i--) if(xp>=LEVEL_THRESHOLDS[i]) return i+1;
+      return 1;
+    }
+    function getUnlockedThemes() {
+      let lvl = getLevel();
+      return THEMES.slice(0,Math.min(THEMES.length,lvl));
+    }
+    function updateXPBar() {
+      let xp = getXP();
+      let lvl = getLevel();
+      let next = LEVEL_THRESHOLDS[lvl]||LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length-1]+400;
+      let prev = LEVEL_THRESHOLDS[lvl-1]||0;
+      let pct = Math.min(100,100*(xp-prev)/(next-prev));
+      document.getElementById('xpBar').style.width = pct+'%';
+      document.getElementById('levelLabel').textContent = 'Lv.'+lvl;
+    }
+    function gainXP(wpm,acc) {
+      let xp = getXP();
+      let add = XP_PER_TEST + XP_PER_WPM*Math.max(0,wpm-20) + XP_PER_ACCURACY*Math.max(0,acc-80);
+      let beforeLvl = getLevel();
+      setXP(xp+add);
+      updateXPBar();
+      if(getLevel()>beforeLvl) showLevelUp();
+    }
+    function showLevelUp() {
+      launchConfetti();
+      showMsg('Level Up! 🎉 New theme unlocked!');
+    }
+    window.addEventListener('DOMContentLoaded',updateXPBar);
+    // Patch into saveHistory
+    const origSaveHistory2 = saveHistory;
+    saveHistory = function() {
+      origSaveHistory2.apply(this, arguments);
+      gainXP(parseInt(wpm.innerText,10),parseInt(accuracy.innerText,10));
+    };
+    // --- Theme Gallery ---
+    function applyTheme(theme) {
+      Object.entries(theme.colors).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+      localStorage.setItem('themeId',theme.id);
+    }
+    function showThemeGallery() {
+      const modal = document.getElementById('themeGalleryModal');
+      const unlocked = getUnlockedThemes();
+      modal.innerHTML = '<div style="background:#fff;padding:24px;border-radius:12px;max-width:340px;margin:40px auto;box-shadow:0 4px 24px #0002;position:relative;z-index:1001;">'+
+        '<h3>Theme Gallery</h3>'+
+        unlocked.map(t=>`<button onclick="applyTheme(THEMES.find(x=>x.id==='${t.id}'))" style="margin:6px 0;padding:8px 16px;border-radius:8px;border:none;background:linear-gradient(90deg,${t.colors['--primary']},${t.colors['--secondary']});color:#fff;font-weight:600;cursor:pointer;">${t.name}</button>`).join('<br>')+
+        '<div style="margin-top:12px;"><button onclick="closeThemeGallery()" style="padding:6px 18px;border-radius:8px;border:none;background:#eee;cursor:pointer;">Close</button></div>'+
+        '</div>';
+      modal.style.display = 'block';
+    }
+    function closeThemeGallery() { document.getElementById('themeGalleryModal').style.display = 'none'; }
+    document.getElementById('themeGalleryBtn').onclick = showThemeGallery;
+    window.THEMES = THEMES; window.applyTheme = applyTheme; window.closeThemeGallery = closeThemeGallery;
+    // On load, apply saved theme
+    window.addEventListener('DOMContentLoaded',()=>{
+      let id = localStorage.getItem('themeId')||'default';
+      let t = THEMES.find(x=>x.id===id)||THEMES[0];
+      applyTheme(t);
+    });
+    // --- Animated Backgrounds ---
+    const bgTypes = ['none','matrix','particles','gradient'];
+    let currentBg = localStorage.getItem('bgType')||'none';
+    function setBgType(type) {
+      currentBg = type;
+      localStorage.setItem('bgType',type);
+      renderBg();
+    }
+    function renderBg() {
+      const bg = document.getElementById('animatedBg');
+      bg.innerHTML = '';
+      bg.style.position = 'fixed';
+      bg.style.top = '0';
+      bg.style.left = '0';
+      bg.style.width = '100vw';
+      bg.style.height = '100vh';
+      bg.style.zIndex = '0';
+      bg.style.pointerEvents = 'none';
+      if(currentBg==='matrix') renderMatrixRain(bg);
+      else if(currentBg==='particles') renderParticles(bg);
+      else if(currentBg==='gradient') renderGradient(bg);
+    }
+    function renderMatrixRain(bg) {
+      let canvas = document.createElement('canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      bg.appendChild(canvas);
+      let ctx = canvas.getContext('2d');
+      let cols = Math.floor(window.innerWidth/20);
+      let drops = Array(cols).fill(1);
+      function draw() {
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#0f0';
+        ctx.font = '18px monospace';
+        for(let i=0;i<drops.length;i++){
+          let txt = String.fromCharCode(0x30A0+Math.random()*96);
+          ctx.fillText(txt,i*20,drops[i]*20);
+          if(drops[i]*20>canvas.height&&Math.random()>0.975) drops[i]=0;
+          drops[i]++;
+        }
+      }
+      setInterval(draw,40);
+    }
+    function renderParticles(bg) {
+      let canvas = document.createElement('canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      bg.appendChild(canvas);
+      let ctx = canvas.getContext('2d');
+      let particles = Array.from({length:60},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,dx:(Math.random()-0.5)*1.5,dy:(Math.random()-0.5)*1.5,r:2+Math.random()*3,c:`hsl(${Math.random()*360},80%,60%)`}));
+      function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for(let p of particles){
+          ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);ctx.fillStyle=p.c;ctx.fill();
+          p.x+=p.dx;p.y+=p.dy;
+          if(p.x<0||p.x>canvas.width) p.dx*=-1;
+          if(p.y<0||p.y>canvas.height) p.dy*=-1;
+        }
+      }
+      setInterval(draw,30);
+    }
+    function renderGradient(bg) {
+      bg.style.background = 'linear-gradient(120deg,#4f8cff 0%,#38e8ff 100%)';
+    }
+    document.getElementById('themeGalleryBtn').insertAdjacentHTML('afterend',`<button class="modern-btn" id="bgBtn" title="Backgrounds"><i class="fa fa-image"></i></button>`);
+    document.getElementById('bgBtn').onclick = function() {
+      let idx = bgTypes.indexOf(currentBg);
+      setBgType(bgTypes[(idx+1)%bgTypes.length]);
+    };
+    window.addEventListener('DOMContentLoaded',renderBg);
+    window.addEventListener('resize',renderBg);
+  </script>
+  <!-- Error Heatmap -->
+  <script>
+    // --- Error Heatmap ---
+    function getErrorStats() {
+      let history = JSON.parse(localStorage.getItem('quoteHistory')) || {};
+      let all = Object.values(history).flat();
+      let errors = {};
+      all.forEach(entry => {
+        if (!entry.input || !entry.quote) return;
+        for (let i = 0; i < Math.min(entry.input.length, entry.quote.length); i++) {
+          if (entry.input[i] !== entry.quote[i]) {
+            let c = entry.quote[i].toLowerCase();
+            if (c.match(/[a-z0-9]/)) errors[c] = (errors[c]||0)+1;
+          }
+        }
+      });
+      return errors;
+    }
+    function updateErrorHeatmap() {
+      const container = document.getElementById('errorHeatmapContainer');
+      let errors = getErrorStats();
+      let keys = Object.keys(errors);
+      if (!keys.length) { container.innerHTML = ''; return; }
+      let max = Math.max(...Object.values(errors));
+      container.innerHTML = '<div style="font-size:0.95em;margin-bottom:4px;">Error Heatmap (last 20 tests)</div>' +
+        keys.sort().map(k => `<span style="display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;margin:2px;border-radius:4px;background:rgba(255,0,0,${0.2+0.8*errors[k]/max});color:#fff;font-weight:700;">${k}</span>`).join('');
+    }
+    // Patch into saveHistory
+    const origSaveHistory3 = saveHistory;
+    saveHistory = function() {
+      origSaveHistory3.apply(this, arguments);
+      updateErrorHeatmap();
+    };
+    window.addEventListener('DOMContentLoaded',updateErrorHeatmap);
+    // --- Practice Mode ---
+    let practiceMode = false;
+    function getPracticeQuote() {
+      let errors = getErrorStats();
+      let sorted = Object.entries(errors).sort((a,b)=>b[1]-a[1]);
+      let chars = sorted.slice(0,5).map(x=>x[0]);
+      if (!chars.length) chars = ['a','s','d','f','j','k','l'];
+      // Generate a quote with those letters
+      let words = [];
+      for (let i=0;i<10;i++) {
+        let w = '';
+        let len = 3+Math.floor(Math.random()*5);
+        for (let j=0;j<len;j++) w += chars[Math.floor(Math.random()*chars.length)];
+        words.push(w);
+      }
+      return words.join(' ');
+    }
+    document.getElementById('practiceBtn').onclick = function() {
+      practiceMode = true;
+      currentQuote = getPracticeQuote();
+      displayQuote(currentQuote, 0);
+      quoteInput.value = '';
+      updateBestWPM();
+      resetStats();
+      typingStarted = false;
+      msg.textContent = 'Practice Mode: Focus on your weak keys!';
+      focusInput();
+      loadHistory();
+      document.getElementById('practiceBtn').innerHTML = '<i class="fa fa-times"></i> Exit Practice';
+    };
+    document.getElementById('practiceBtn').addEventListener('dblclick', function() {
+      practiceMode = false;
+      getNewQuote();
+      document.getElementById('practiceBtn').innerHTML = '<i class="fa fa-dumbbell"></i>';
+    });
+    // Save input and quote for error analysis
+    const origSaveHistory4 = saveHistory;
+    saveHistory = function() {
+      // Save input and quote for error analysis
+      let history = JSON.parse(localStorage.getItem('quoteHistory')) || {};
+      if (!history[currentQuote]) history[currentQuote] = [];
+      let last = history[currentQuote][history[currentQuote].length-1];
+      if (last) {
+        last.input = quoteInput.value;
+        last.quote = currentQuote;
+        localStorage.setItem('quoteHistory', JSON.stringify(history));
+      }
+      origSaveHistory4.apply(this, arguments);
+    };
+  </script>
+  <!-- Global Leaderboard & Shareable Results -->
+  <script>
+    // --- Global Leaderboard & Shareable Results ---
+    const globalApiUrl = 'https://api.npoint.io/6eae1e6e2e2e2e2e2e2e'; // Example public bin (read-only fallback)
+    function fetchGlobalLeaderboard() {
+      fetch(globalApiUrl)
+        .then(r=>r.json())
+        .then(data=>{
+          const container = document.getElementById('globalLeaderboardContainer');
+          if (!data || !Array.isArray(data.scores)) { container.innerHTML = '<div style="color:#f44">Could not load global leaderboard.</div>'; return; }
+          let top = data.scores.slice(0,5);
+          container.innerHTML = '<h4 style="margin:8px 0 4px 0;">🌍 Global Leaderboard</h4>' +
+            '<ol style="padding-left:18px;">'+
+            top.map(s=>`<li><b>${s.wpm} WPM</b> <span style="color:#888;">${s.nickname||'Guest'}</span></li>`).join('')+
+            '</ol>';
+        })
+        .catch(()=>{
+          document.getElementById('globalLeaderboardContainer').innerHTML = '<div style="color:#f44">Could not load global leaderboard.</div>';
+        });
+    }
+    window.addEventListener('DOMContentLoaded',fetchGlobalLeaderboard);
+    // --- Shareable Results ---
+    document.getElementById('shareBtn').onclick = function() {
+      // Create a canvas snapshot of the result
+      const canvas = document.createElement('canvas');
+      canvas.width = 400; canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg')||'#fff';
+      ctx.fillRect(0,0,400,180);
+      ctx.font = 'bold 28px Montserrat,Segoe UI,sans-serif';
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary')||'#4f8cff';
+      ctx.fillText('Typing Test Result', 20, 40);
+      ctx.font = '20px Montserrat,Segoe UI,sans-serif';
+      ctx.fillStyle = '#222';
+      ctx.fillText('WPM:', 20, 80);
+      ctx.fillText(document.getElementById('wpm').innerText, 90, 80);
+      ctx.fillText('Accuracy:', 20, 110);
+      ctx.fillText(document.getElementById('accuracy').innerText+'%', 130, 110);
+      ctx.fillText('Level:', 20, 140);
+      ctx.fillText(document.getElementById('levelLabel').textContent, 90, 140);
+      ctx.font = '16px Montserrat,Segoe UI,sans-serif';
+      ctx.fillStyle = '#888';
+      ctx.fillText('by '+(localStorage.getItem('nickname')||'Guest'), 20, 170);
+      // Avatar
+      const imgData = localStorage.getItem('avatarImg');
+      if (imgData) {
+        const img = new window.Image();
+        img.onload = function() {
+          ctx.save();
+          ctx.beginPath();ctx.arc(350,60,32,0,2*Math.PI);ctx.closePath();ctx.clip();
+          ctx.drawImage(img,318,28,64,64);
+          ctx.restore();
+          finishShare();
+        };
+        img.src = imgData;
+      } else {
+        finishShare();
+      }
+      function finishShare() {
+        const url = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'typing_result.png';
+        a.click();
+      }
+    };
+  </script>
+  <!-- Zen Mode -->
+  <script>
+    // --- Zen Mode ---
+    let zenMode = false;
+    const zenOverlay = document.getElementById('zenOverlay');
+    document.getElementById('zenModeBtn').onclick = function() {
+      zenMode = !zenMode;
+      if (zenMode) {
+        document.querySelector('.main-card').style.boxShadow = 'none';
+        document.body.style.background = 'transparent';
+        zenOverlay.style.display = 'block';
+        document.querySelectorAll('.header,.config-row,.progress-container,.stats-row,.history,.leaderboard,.msg,#progressChartContainer,#errorHeatmapContainer,#achievementsSection,#themeGalleryModal,#musicModal,#dailyChallengeBar,#questBar').forEach(e=>e&&(e.style.display='none'));
+        showMsg('Zen Mode: Focus and relax.');
+        playMusic('zen');
+      } else {
+        document.querySelector('.main-card').style.boxShadow = '';
+        document.body.style.background = '';
+        zenOverlay.style.display = 'none';
+        document.querySelectorAll('.header,.config-row,.progress-container,.stats-row,.history,.leaderboard,.msg,#progressChartContainer,#errorHeatmapContainer,#achievementsSection,#themeGalleryModal,#musicModal,#dailyChallengeBar,#questBar').forEach(e=>e&&(e.style.display=''));
+        stopMusic();
+      }
+    };
+    // --- Music ---
+    const musicTracks = [
+      {id:'zen',name:'Zen Garden',url:'https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b8b6b6.mp3'},
+      {id:'focus',name:'Focus Flow',url:'https://cdn.pixabay.com/audio/2022/07/26/audio_124b7b7b7b.mp3'},
+      {id:'retro',name:'Retro Vibes',url:'https://cdn.pixabay.com/audio/2022/07/26/audio_124b7b7b7c.mp3'},
+      {id:'none',name:'None',url:''}
+    ];
+    let currentMusic = null;
+    function playMusic(id) {
+      stopMusic();
+      if (id==='none') return;
+      const track = musicTracks.find(t=>t.id===id);
+      if (!track) return;
+      currentMusic = new Audio(track.url);
+      currentMusic.loop = true;
+      currentMusic.volume = 0.25;
+      currentMusic.play();
+      localStorage.setItem('musicId',id);
+    }
+    function stopMusic() {
+      if (currentMusic) { currentMusic.pause(); currentMusic=null; }
+      localStorage.setItem('musicId','none');
+    }
+    document.getElementById('musicBtn').onclick = function() {
+      const modal = document.getElementById('musicModal');
+      modal.innerHTML = '<div style="background:#fff;padding:24px;border-radius:12px;max-width:340px;margin:40px auto;box-shadow:0 4px 24px #0002;position:relative;z-index:1001;">'+
+        '<h3>Background Music</h3>'+
+        musicTracks.map(t=>`<button onclick="playMusic('${t.id}')" style="margin:6px 0;padding:8px 16px;border-radius:8px;border:none;background:#eee;color:#222;font-weight:600;cursor:pointer;">${t.name}</button>`).join('<br>')+
+        '<div style="margin-top:12px;"><button onclick="closeMusicModal()" style="padding:6px 18px;border-radius:8px;border:none;background:#eee;cursor:pointer;">Close</button></div>'+
+        '</div>';
+      modal.style.display = 'block';
+    };
+    function closeMusicModal() { document.getElementById('musicModal').style.display = 'none'; }
+    window.closeMusicModal = closeMusicModal;
+    window.playMusic = playMusic;
+    window.stopMusic = stopMusic;
+    window.addEventListener('DOMContentLoaded',()=>{
+      let id = localStorage.getItem('musicId')||'none';
+      if (id && id!=='none') playMusic(id);
+    });
   </script>
 </body>
 </html>
