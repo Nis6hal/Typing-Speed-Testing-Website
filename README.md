@@ -3,7 +3,6 @@
 A modern, feature-rich typing speed test application built with vanilla HTML, CSS, and JavaScript. Test your typing speed, improve your accuracy, and track your progress with an intuitive and beautiful interface.
 
 ![Typing Speed Test](https://img.shields.io/badge/Status-Live-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-blue)
 ![Version](https://img.shields.io/badge/Version-1.0.0-orange)
 
 ## ✨ Features
